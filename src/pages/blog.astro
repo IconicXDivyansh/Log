@@ -1,0 +1,67 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import type { Fragment } from "astro/compiler-runtime";
+import { getAllBlogPosts } from "../lib/blog";
+
+const allPosts = await getAllBlogPosts();
+---
+
+<BaseLayout title="Blog">
+  <div class="container">
+    <h1>Blog</h1>
+    <p class="intro">Welcome to my blog. Here are all my posts.</p>
+    {
+      allPosts.length === 0 ? (
+        <p>No blog posts yet.</p>
+      ) : (
+        <ul class="blog-list bg-linear-to-br from-blue-200 dark:from-blue-900 via-orange-100 dark:via-orange-800 dark:to-purple-900 to-purple-200 p-1 flex flex-col gap-1 rounded-xl ">
+          {allPosts.map((post) => (
+            <a
+              href={`/blog/${post.slug}/`}
+              class="bg-white/50 backdrop-blur-3xl dark:bg-neutral-900/80 hover:bg-zinc-100/10  p-2 hover:p-2.5   transition-all duration-200 first:rounded-t-[calc(var(--radius-xl)-3px)] last:rounded-b-[calc(var(--radius-xl)-3px)]"
+            >
+              <li class="blog-item ">
+                <h2 class="font-pixel-square text-2xl bg-linear-to-r from-white to-black inline-block bg-clip-text">
+                  {post.data.title}
+                </h2>
+                <p class="description text-sm  text-muted-foreground  dark:text-neutral-300 pl-0.5">
+                  {post.data.description}
+                </p>
+                {/* <p class="date">
+                {post.data.pubDate.toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p> */}
+              </li>
+            </a>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .intro {
+    color: #666;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+  }
+
+  .blog-item:last-child {
+    border-bottom: none;
+  }
+</style>

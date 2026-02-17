@@ -1,0 +1,131 @@
+---
+title: "Theme Toggle in Astro"
+description: "A guide to setting up a theme toggle in Astro."
+pubDate: 2026-02-14
+tags: ["astro", "tutorial", "guide"]
+---
+
+import CodeBlock from "@/components/CodeBlock.astro";
+import ComponentPreview from "@/components/ComponentPreview.astro";
+import Button from "@/components/bearnie/button/Button.astro";
+import ThemeToggle from "@/components/common/ThemeToggle.astro";
+
+
+#### Pre-requisite
+Before making the theme toggle it's very important to know the understand between the way <code class="code">script</code> works in vanilla javascript and in astro.  
+>Astro by default ships zero javascript by default.
+
+Take a look at this code.
+
+```ts
+---
+const function greeting(name: string){
+    return `Ahoy! ${name}`
+}
+
+const greet = greeting("Pirate");
+
+console.log(greet); // Never gets logged in browser console.
+---
+
+// Static HTML markup
+<h1> Greeting message from server side {greet}</h1>
+
+
+```
+
+
+What it means is that the whatever javascript you write in <strong> frontmatter / component script</strong> run on <strong>server side</strong>.
+During the build time  server executes script and then populate template (html part of astro component), together they will be used to make up the html content to be sent from server to the client.
+Since, server takes care of executing the script therefore no heavy script like the ones in SPA frameworks gets shipped to client side. What browser recieves is simple plain, static html.
+So effectively <em class="text-zinc-700">Astro sends zero javascript to the client.</em>
+
+<br/>
+> **Question**
+>
+> What about Interactivity ?  What if we have some logic that needs to run on client or is Astro only good for serving static content ? 
+
+Well, yes Astro supports client side script too and how to use it, the answer to that is more common than you think.
+Just like in vanilla javascript we use script tag here too we can simply use <span class="highlight">`<script>`</span> tags in Astro.
+So, what's the difference between the ones in vanilla javascript and astro ?
+
+<span class="highlight"> `<script>` </span> tells Astro that the following javascript has to be executed client side just like in vanilla javascript. So Astro bundles it with along html page. The html page references this script, script gets downloaded and executed client side for interactivity.
+
+<div class="border-2 w-20 mx-auto h-1 border-dashed my-2"></div>
+
+### Implementation
+For making theme toggle we will need two things -> **UI** (to toggle) + **Script** (the logic)
+1. Component for toggling theme
+
+We will make use of class based toggle. For this we will add <span class="highlight">.dark</span> class to the root element which is html.
+
+<ComponentPreview code={`<button id="theme-toggle">
+    <div class="flex items-center justify-center">
+      <Sun class="hidden dark:block" />
+      <Moon class="dark:hidden" />
+    </div>
+</button>
+
+<script>
+ const themeToggle = document.getElementById("theme-toggle");
+ const htmlElement = document.documentElement;
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      htmlElement.classList.toggle("dark");
+    });
+  }
+</script>
+`}>
+  <ThemeToggle animation="false"/>
+</ComponentPreview>
+
+
+
+But when you refresh, the theme will reset to default. To persist the theme we can use **local storage**. Whenever user toggles the theme we will save the preference in local storage and then on page load we will check for that preference and apply it.
+
+```ts
+  <script>
+
+  const themeToggle = document.getElementById("theme-toggle");
+  const htmlElement = document.documentElement;
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    htmlElement.classList.add("dark");
+  }
+
+  if (themeToggle) {
+    themeToggle.addEventListener("click", () => {
+      htmlElement.classList.toggle("dark");
+      const isDark = htmlElement.classList.contains("dark");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    });
+  }
+
+</script>
+
+```
+
+But when since these astro scripts are non-blocking, they get executed after the page has loaded. This means that there will be a flash of unstyled content (FOUC) where the default theme is visible before the script runs and applies the saved theme. To prevent this, we can add a small inline script in the head of our document that checks for the saved theme and applies it before the page renders.
+
+
+> The default behaviour of Astro script is to be non-blocking and execute after the page has loaded. This is great for performance but can lead to issues like FOUC when you need to apply a theme or any critical styles before the page renders. By adding an inline script in the head, we can ensure that the correct theme is applied immediately, providing a smoother user experience without flashes of the default theme.
+
+But how do we add an inline script in the head in Astro ?
+
+Using `is:inline` directive in script tag, we can tell Astro to render the script inline in the head of the document. This way, the script will execute before the page renders, allowing us to apply the saved theme immediately and prevent FOUC.
+
+```ts {1}
+<script is:inline>
+  const savedTheme = localStorage.getItem("theme");
+  ....rest of the code
+</script>
+```
+
+
+After adding the inline script, the unstyled flash should be gone and the correct theme will be applied immediately on page load based on the user's saved preference in local storage.
+
+
+<ComponentPreview>
+  <ThemeToggle animation="true"/>
+</ComponentPreview>

@@ -1,0 +1,82 @@
+:root {
+  /* Colors - Bearnie compatible */
+  --foreground: oklch(0.145 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --primary: oklch(0.205 0 0);
+  --border: oklch(0.922 0 0);
+  --muted: oklch(0.97 0 0);
+  --card: oklch(1 0 0);
+
+  /* Typography */
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  /* Spacing */
+  --spacing: 0.25rem;
+
+  /* Code block styling */
+  --code-line-number: oklch(0.708 0 0);
+}
+
+:root.dark {
+  --foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --primary: oklch(0.922 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --muted: oklch(0.2 0 0);
+  --card: oklch(0.145 0 0);
+
+  /* Dark mode code block styling */
+  --code-line-number: oklch(0.708 0 0);
+}
+
+/* Shiki Code Block Syntax Highlighting */
+.astro-code {
+  border-radius: var(--radius-md);
+  margin: 1.25rem 0;
+  overflow-x: auto;
+  counter-reset: line;
+}
+
+:root.dark .astro-code {
+  outline: 1px solid var(--color-border);
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
+:root.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+}
+
+.astro-code > code {
+  display: grid;
+}
+
+.astro-code .line {
+  border-left: 3px solid transparent;
+  display: inline-block;
+  box-sizing: border-box;
+  margin-block: 0;
+  width: 100%;
+}
+
+.astro-code .line::before {
+  counter-increment: line;
+  content: counter(line);
+  display: inline-block;
+  margin-right: 1.5rem;
+  text-align: right;
+  color: var(--code-line-number);
+  user-select: none;
+}
+
+.astro-code .line.highlighted {
+  background-color: var(--muted);
+  border-left-color: var(--primary);
+}

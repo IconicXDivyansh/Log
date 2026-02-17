@@ -1,0 +1,199 @@
+---
+import { cn } from "@/utils/cn";
+import Copy from "@lucide/astro/icons/copy";
+import Check from "@lucide/astro/icons/check";
+import CodeBlock from "@/components/CodeBlock.astro";
+
+export interface Props {
+  code?: string;
+  displayCode?: string;
+  fullWidth?: boolean;
+  class?: string;
+}
+
+const { code, displayCode, fullWidth = false, class: className } = Astro.props;
+
+// Check if code is provided via named slot
+let codeFromSlot: string | null = null;
+if (Astro.slots.has("code")) {
+  const renderedSlot = await Astro.slots.render("code");
+  // Extract text content from the rendered <pre><code>...</code></pre>
+  const codeMatch = renderedSlot.match(/<code[^>]*>([\s\S]*?)<\/code>/);
+  if (codeMatch) {
+    // Strip all HTML tags (Shiki adds <span> elements for highlighting)
+    let plainText = codeMatch[1].replace(/<[^>]*>/g, "");
+    // Decode HTML entities
+    codeFromSlot = plainText
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&#x27;/g, "'");
+  }
+}
+
+// Generate a unique ID for this preview
+const id = `preview-${Math.random().toString(36).substring(2, 9)}`;
+
+// Basic normalization - remove common leading whitespace
+function normalizeCode(value: string) {
+  const normalized = value.replace(/\r\n?/g, "\n").replace(/\t/g, "  ");
+  const trimmed = normalized.replace(/^\n+/, "").replace(/\s+$/, "");
+  const lines = trimmed.split("\n");
+  const indents = lines
+    .filter((line) => line.trim().length > 0)
+    .map((line) => line.match(/^\s+/)?.[0].length ?? 0);
+  const minIndent = indents.length ? Math.min(...indents) : 0;
+  return lines
+    .map((line) => line.slice(minIndent).replace(/\s+$/g, ""))
+    .join("\n");
+}
+
+// Priority: displayCode > codeFromSlot > code prop
+const normalizedCode = displayCode
+  ? normalizeCode(displayCode)
+  : codeFromSlot
+    ? normalizeCode(codeFromSlot)
+    : code
+      ? normalizeCode(code)
+      : "";
+---
+
+<div
+  class={cn("not-prose w-full max-w-full min-w-0 my-4", className)}
+  data-component-preview={id}
+>
+  <!-- Tab buttons -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-1">
+      <button
+        type="button"
+        class="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground data-active:text-foreground data-active:bg-muted rounded-md transition-colors"
+        data-preview-tab="preview"
+        data-active
+      >
+        Preview
+      </button>
+      <button
+        type="button"
+        class="px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground data-active:text-foreground data-active:bg-muted rounded-md transition-colors"
+        data-preview-tab="code"
+      >
+        Code
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="flex items-center justify-center p-2 text-muted-foreground hover:text-foreground rounded-lg transition-colors"
+      data-copy-button
+    >
+      <Copy size={16} data-copy-icon />
+      <Check size={16} class="hidden" data-check-icon />
+    </button>
+  </div>
+
+  <!-- Tab panels -->
+  <div class="mt-2">
+    <!-- Preview panel with fixed min-height to prevent layout shift -->
+    <div
+      class={cn(
+        "min-h-24 rounded-lg overflow-x-auto lg:overflow-visible",
+        fullWidth
+          ? "p-0"
+          : "p-8 lg:p-20 border border-gray-200 dark:border-gray-800",
+      )}
+      data-preview-panel="preview"
+    >
+      <div
+        class={cn(
+          "flex items-center justify-center w-max min-w-full",
+          !fullWidth && "max-w-lg mx-auto",
+        )}
+      >
+        <slot />
+      </div>
+    </div>
+
+    <!-- Code panel (hidden by default) -->
+    <div
+      class="hidden rounded-lg overflow-hidden max-h-[400px] overflow-y-auto w-full max-w-full min-w-0 scrollbar-hide"
+      data-preview-panel="code"
+    >
+      <span class="sr-only" data-code-content>
+        {normalizedCode}
+      </span>
+      <CodeBlock
+        code={normalizedCode}
+        lang="astro"
+        class="rounded-none p-4 border-0 bg-muted/50"
+        showCopy={false}
+      />
+    </div>
+  </div>
+</div>
+
+<script>
+  function initComponentPreviews() {
+    document
+      .querySelectorAll("[data-component-preview]")
+      .forEach((container) => {
+        if (container.hasAttribute("data-initialized")) return;
+        container.setAttribute("data-initialized", "true");
+
+        const tabs = container.querySelectorAll("[data-preview-tab]");
+        const panels = container.querySelectorAll("[data-preview-panel]");
+        const copyButton = container.querySelector("[data-copy-button]");
+        const copyIcon = copyButton?.querySelector("[data-copy-icon]");
+        const checkIcon = copyButton?.querySelector("[data-check-icon]");
+
+        // Tab switching logic
+        function setActiveTab(activeValue: string) {
+          tabs.forEach((tab) => {
+            if (tab.getAttribute("data-preview-tab") === activeValue) {
+              tab.setAttribute("data-active", "");
+            } else {
+              tab.removeAttribute("data-active");
+            }
+          });
+
+          panels.forEach((panel) => {
+            if (panel.getAttribute("data-preview-panel") === activeValue) {
+              panel.classList.remove("hidden");
+            } else {
+              panel.classList.add("hidden");
+            }
+          });
+        }
+
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const value = tab.getAttribute("data-preview-tab");
+            if (value) setActiveTab(value);
+          });
+        });
+
+        // Copy functionality
+        copyButton?.addEventListener("click", async () => {
+          const codeContent = container.querySelector("[data-code-content]");
+          const code = codeContent?.textContent || "";
+
+          try {
+            await navigator.clipboard.writeText(code);
+            copyIcon?.classList.add("hidden");
+            checkIcon?.classList.remove("hidden");
+            setTimeout(() => {
+              copyIcon?.classList.remove("hidden");
+              checkIcon?.classList.add("hidden");
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy:", err);
+          }
+        });
+      });
+  }
+
+  initComponentPreviews();
+  document.addEventListener("astro:page-load", initComponentPreviews);
+</script>

@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import type { Fragment } from "astro/compiler-runtime";
+---
+
+<BaseLayout title="Welcome to Bearnie">
+  <main class="min-h-screen flex flex-col">
+    <!-- Hero -->
+    <section class="flex-1 flex items-center justify-center px-4">
+      <div class="max-w-sm text-center mx-auto">
+        <!-- Bearnie Logo -->
+
+        <h1 class="text-6xl font-pixel-square font-medium tracking-tight mt-12">
+          Log
+        </h1>
+
+        <p class="text-sm text-muted-foreground mt-8 font-mono">
+          Learn • Experiment • Log • Remember
+        </p>
+
+        <div class="flex items-center gap-2.5 mt-12 justify-center">
+          <a
+            href="/blog"
+            class="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          >
+            ->
+          </a>
+          <!-- <a
+            href="https://bearnie.dev/docs/components"
+            class="inline-flex items-center justify-center rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+          >
+            Browse Components
+          </a> -->
+        </div>
+
+        <code class="mt-8 block text-xs text-muted-foreground font-mono">
+        </code>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8">
+      <div class="max-w-2xl mx-auto text-center">
+        <p class="text-sm text-muted-foreground"></p>
+      </div>
+    </footer>
+  </main>
+</BaseLayout>

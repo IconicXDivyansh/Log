@@ -1,0 +1,115 @@
+/* 
+  Geist Font Family - Best Practices Implementation
+  - Modern woff2 format only
+  - Optimized for minimal FOUT (Flash of Unstyled Text)
+  - Variable fonts for weight range support
+  - Proper font-display strategy
+*/
+
+/* ============================================
+   Geist (Sans Serif) - Variable Font
+   ============================================ */
+
+/* Variable font - covers all weights and widths */
+@font-face {
+  font-family: "Geist";
+  src: url("/geist-font/Geist/webfonts/Geist[wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("/geist-font/Geist/webfonts/Geist-Italic[wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: italic;
+}
+
+/* ============================================
+   Geist Mono (Monospace) - Variable Font
+   ============================================ */
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/geist-font/GeistMono/webfonts/GeistMono[wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/geist-font/GeistMono/webfonts/GeistMono-Italic[wght].woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+  font-style: italic;
+}
+
+/* ============================================
+   Geist Pixel (Icon Font) 
+   ============================================ */
+
+@font-face {
+  font-family: "Geist Pixel Circle";
+  src: url("/geist-font/GeistPixel/webfonts/GeistPixel-Circle.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist Pixel Grid";
+  src: url("/geist-font/GeistPixel/webfonts/GeistPixel-Grid.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist Pixel Line";
+  src: url("/geist-font/GeistPixel/webfonts/GeistPixel-Line.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist Pixel Square";
+  src: url("/geist-font/GeistPixel/webfonts/GeistPixel-Square.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Geist Pixel Triangle";
+  src: url("/geist-font/GeistPixel/webfonts/GeistPixel-Triangle.woff2") format("woff2");
+  font-weight: normal;
+  font-display: swap;
+  font-style: normal;
+}
+
+/* ============================================
+   Font Optimization
+   ============================================ */
+
+/* Preload critical font weights for faster rendering */
+html {
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Reduce FOUT by using system fonts during loading */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Geist", sans-serif;
+}
+
+code,
+pre,
+kbd {
+  font-family: "Monaco", "Menlo", "Uber Mono", "Roboto Mono", "Courier New", "Geist Mono", monospace;
+}

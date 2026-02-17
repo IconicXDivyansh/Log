@@ -1,0 +1,109 @@
+---
+import ThemeToggle from "@/components/common/ThemeToggle.astro";
+import "@/styles/global.css";
+import "@/styles/prose.css";
+import "@/styles/variables.css";
+import type { Fragment } from "astro/compiler-runtime";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "My Bearnie App",
+  description = "A Personal Project for writing down my day-to-day learnings",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Preload critical fonts to reduce FOUT (Flash of Unstyled Text) -->
+    <link
+      rel="preload"
+      href="/geist-font/Geist/webfonts/Geist[wght].woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/geist-font/GeistMono/webfonts/GeistMono[wght].woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <script is:inline>
+      function initTheme() {
+        const htmlElement = document.documentElement;
+        const storedTheme = localStorage.getItem("theme");
+
+        if (storedTheme === "dark") {
+          htmlElement.classList.add("dark");
+        } else if (storedTheme === "light") {
+          htmlElement.classList.remove("dark");
+        } else {
+          const prefersDark = window.matchMedia(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          if (prefersDark) {
+            htmlElement.classList.add("dark");
+            localStorage.setItem("theme", "dark");
+          } else {
+            localStorage.setItem("theme", "light");
+          }
+        }
+      }
+      initTheme();
+      document.addEventListener("astro:after-swap", initTheme);
+    </script>
+  </head>
+  <body
+    class="min-h-screen bg-background text-foreground antialiased scroll-smooth selection:bg-neutral-200 dark:selection:bg-neutral-700"
+  >
+    <header
+      id="main-header"
+      class="sticky top-0 z-50 transition-all duration-300 ease-in-out"
+    >
+      <nav class="flex justify-end container mx-auto max-w-3xl p-2 md:px-8">
+        <ThemeToggle />
+      </nav>
+    </header>
+    <slot />
+
+    <script>
+      function initScrollObserver() {
+        const header = document.getElementById("main-header");
+        if (!header) return;
+
+        const onScroll = () => {
+          if (window.scrollY > 50) {
+            header.classList.add(
+              "bg-background/50",
+              "backdrop-blur-md",
+              "shadow-sm",
+            );
+          } else {
+            header.classList.remove(
+              "bg-background/50",
+              "backdrop-blur-md",
+              "shadow-sm",
+            );
+          }
+        };
+
+        window.addEventListener("scroll", onScroll);
+        onScroll(); // Check initial state
+      }
+
+      initScrollObserver();
+      document.addEventListener("astro:after-swap", initScrollObserver);
+    </script>
+  </body>
+</html>
